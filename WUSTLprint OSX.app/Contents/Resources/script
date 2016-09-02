@@ -1,0 +1,58 @@
+#####################################################################################
+#			Created by Shungheon Chad Chai				    #
+#	For Washington University IT - Student Technology Services		    #
+#		Contact me by email: chad2212@gmail.com				    #
+#####################################################################################
+
+
+#disables Gatekeeper (Security & Privacy --> Apps Downloaded From)
+spctl --master-disable
+
+
+#remove any pre-existing remains of previous operations such as removing the folder name WUSTLprint
+rm -rf ~/Downloads/WUSTLprint
+
+
+#remove existing all WUSTL prints
+lpstat -p | awk '{print $2}' | while read printer
+do
+if [[ $printer == *"WUSTLprint"* ]]
+then
+lpadmin -x $printer
+echo "Deleted:" $printer
+fi
+done
+echo "All WUSTL printer removed and ready for next stage"
+
+
+#remove all saved states from /Library/Preferences
+find ~/Library/Preferences -type f -name "*WUSTLprint*" -exec rm -rf {} \;
+
+
+#remove all saved states from /Library/Saved Application States
+find ~/Library/Saved\ Application\ State/ -type d -name "*WUSTLprint*" -exec rm -rf {} \;
+
+
+echo "Removed all pre-existing saved states"
+
+#######################################################################################
+# 			Begin Download and Installation				      #
+#######################################################################################
+
+
+
+#Go to the Downloads folder and get the package
+cd ~/Downloads
+echo "Downloading the print zip file"
+curl -o ./WUSTLprint.zip "http://sts.wustl.edu/files/printing/WUSTLprint%20Setup%20-%20OS%20X.zip"
+echo "Download has been completed and now going to start unzipping"
+unzip -q WUSTLprint.zip -d WUSTLprint 
+echo "Upzip completed"
+rm WUSTLprint.zip
+osascript WUSTLprint/WUSTLprint\ Setup\ -\ OS\ X/WUSTLprint.app/Contents/Resources/SimpleScript.scpt
+spctl --master-enable
+echo "Successfully removed all downloaded folders"
+
+
+echo "Complete"
+
